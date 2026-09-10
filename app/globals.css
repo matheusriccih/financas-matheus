@@ -1,0 +1,24 @@
+
+@import "tailwindcss";
+
+:root {
+  --bg:#020811;
+  --panel:#08111d;
+  --panel2:#0a1421;
+  --line:rgba(73,115,166,.22);
+  --blue:#2f72ff;
+  --blue2:#5b91ff;
+  --green:#42dc8b;
+  --red:#ff515b;
+  --purple:#a663ff;
+  --text:#f4f7fb;
+  --muted:#8290a3;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{font-family:Arial,Helvetica,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #73a1ff;outline-offset:3px}
+a{text-decoration:none;color:inherit}
+::selection{background:#2f72ff55}
