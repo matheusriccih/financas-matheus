@@ -2,7 +2,7 @@
 
 ## Antes do deploy
 
-- [ ] `.env.production` criado somente na VPS com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- [ ] Variáveis de produção cadastradas somente no painel da Vercel com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - [ ] Nenhuma chave `service_role`, secret, senha ou token foi enviada ao Git.
 - [ ] [supabase/schema.sql](supabase/schema.sql) executado com sucesso no Supabase.
 - [ ] A migration de cartões foi executada caso o schema já existisse antes desta versão.
@@ -10,15 +10,13 @@
 - [ ] Registros legados com `user_id` nulo foram associados manualmente ao proprietário correto ou mantidos inacessíveis.
 - [ ] `npm ci`, `npm run lint`, `npx tsc --noEmit` e `npm run build` passaram na versão a publicar.
 
-## VPS e domínio
+## Vercel e domínio
 
-- [ ] Node.js LTS, Nginx e PM2 estão instalados.
-- [ ] Aplicação está em `/var/www/financas-matheus/current`, fora de diretórios públicos.
-- [ ] `pm2 status` mostra `financas-matheus` online.
-- [ ] `pm2 save` e `pm2 startup` foram configurados.
-- [ ] DNS A aponta para a VPS e portas 80/443 estão abertas.
-- [ ] Nginx passa a requisição para `127.0.0.1:3000`.
-- [ ] Certificado HTTPS emitido e redirecionamento HTTP→HTTPS confirmado.
+- [ ] Repositório GitHub foi importado na Vercel pela branch `main`.
+- [ ] As três variáveis `NEXT_PUBLIC_*` foram cadastradas em Production.
+- [ ] O build e deploy da Vercel concluíram sem erros.
+- [ ] O domínio foi adicionado em Settings → Domains e os registros DNS indicados pela Vercel foram configurados.
+- [ ] HTTPS automático da Vercel está ativo.
 - [ ] URL final está configurada no Supabase Auth.
 - [ ] `NEXT_PUBLIC_SITE_URL` usa a mesma URL HTTPS canônica.
 - [ ] SMTP personalizado, SPF e DKIM foram configurados no painel do Supabase.
@@ -32,7 +30,7 @@
 - [ ] Movimentação de cartão integra fatura, limite disponível e relatório.
 - [ ] Meta, cartões e movimentações persistem após recarregar a página.
 - [ ] Interface é navegável no celular e desktop.
-- [ ] Não há erros sensíveis no console, PM2 ou Nginx.
+- [ ] Não há erros sensíveis no console do navegador, nos logs de Functions ou no deployment da Vercel.
 
 ## Roteiro funcional completo
 

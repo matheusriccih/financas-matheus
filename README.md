@@ -1,6 +1,6 @@
 # Finanças Matheus
 
-Sistema financeiro pessoal multiusuário para registrar movimentações, acompanhar cartões de crédito, metas e relatórios com dados reais. O frontend é Next.js, a autenticação e persistência usam Supabase, e o projeto foi preparado para VPS HostGator com Node.js.
+Sistema financeiro pessoal multiusuário para registrar movimentações, acompanhar cartões de crédito, metas e relatórios com dados reais. O frontend é Next.js, a autenticação e persistência usam Supabase, e a produção usa Vercel.
 
 ## Stack
 
@@ -21,6 +21,7 @@ As únicas variáveis necessárias são:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 ## Comandos de qualidade
@@ -45,11 +46,11 @@ O schema habilita RLS em todas as tabelas financeiras. Triggers definem `user_id
 
 Se houver um registro legado com `user_id` nulo, ele não ficará acessível com RLS. Associe-o ao usuário correto diretamente pelo SQL Editor antes de exigir `NOT NULL` na coluna.
 
-Para instruções completas de produção em HostGator, veja [DEPLOY.md](DEPLOY.md).
+Para instruções completas de produção na Vercel, veja [DEPLOY.md](DEPLOY.md).
 
-## Produção e HostGator
+## Produção na Vercel
 
-O projeto não é compatível com hospedagem estática/PHP. Use uma VPS HostGator com Node.js, Nginx e PM2. O guia completo, com DNS, SSL, comandos, logs, atualização e rollback, está em [DEPLOY-HOSTGATOR.md](DEPLOY-HOSTGATOR.md). Consulte também [CHECKLIST-PRODUCAO.md](CHECKLIST-PRODUCAO.md) antes de publicar.
+A Vercel detecta automaticamente Next.js e executa `npm run build`; não é necessário `vercel.json`, Nginx, PM2 ou exportação estática. O guia de importação do GitHub, variáveis, domínio e Supabase está em [DEPLOY.md](DEPLOY.md). Consulte também [CHECKLIST-PRODUCAO.md](CHECKLIST-PRODUCAO.md) antes de publicar.
 
 ## Estrutura
 
@@ -59,7 +60,6 @@ components/          interface e formulários
 lib/                 Supabase e regras financeiras
 types/               tipos TypeScript
 supabase/schema.sql  criação/migração idempotente do banco
-ecosystem.config.cjs processo PM2 para VPS
 ```
 
 Detalhes de tabelas, RLS, índices, triggers e compatibilidade legada estão em [SCHEMA-SUPABASE.md](SCHEMA-SUPABASE.md).

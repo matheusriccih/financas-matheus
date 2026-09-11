@@ -8,7 +8,7 @@
 - Recuperação de senha, callback, nova senha e encerramento da sessão após a alteração.
 - Callback em `/auth/callback`, que troca o código do Supabase por cookies de sessão sem expor token na URL.
 
-O app usa `NEXT_PUBLIC_SITE_URL` apenas para compor URLs públicas de callback. Em desenvolvimento, use `http://localhost:3000`; na VPS, use exatamente a URL HTTPS canônica, sem barra final.
+O app usa `NEXT_PUBLIC_SITE_URL` apenas para compor URLs públicas de callback. Em desenvolvimento, use `http://localhost:3000`; na Vercel, use exatamente a URL HTTPS canônica, sem barra final, no ambiente Production.
 
 ## Configuração manual no painel Supabase
 
@@ -31,7 +31,7 @@ O serviço de e-mail padrão do Supabase possui limites e não deve ser a única
 - Nome e e-mail do remetente;
 - Domínio de envio.
 
-Configure SPF e DKIM no DNS conforme o provedor SMTP, e adicione DMARC quando possível. Essas credenciais pertencem somente ao painel do Supabase; nunca entram em `.env`, navegador, repositório ou PM2.
+Configure SPF e DKIM no DNS conforme o provedor SMTP, e adicione DMARC quando possível. Essas credenciais pertencem somente ao painel do Supabase; nunca entram em `.env`, navegador, repositório ou Vercel.
 
 ## Teste manual de e-mail
 

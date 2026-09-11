@@ -1,52 +1,70 @@
-# Deploy em produção — Finanças Matheus
+# Deploy na Vercel
 
-## Decisão de arquitetura
+O Finanças Matheus é um projeto Next.js compatível com deploy direto pela Vercel. Não requer `vercel.json`, PM2, Nginx, VPS ou exportação estática.
 
-Este projeto usa Next.js com middleware de sessão e rotas protegidas. Portanto, ele exige hospedagem com **Node.js persistente** para executar `next start`. Hospedagem compartilhada que aceita somente arquivos estáticos/PHP não é compatível com esta versão. Não use `next export`: isso removeria o middleware de autenticação e não é uma alternativa equivalente.
+## Pré-requisitos
 
-Na HostGator, use um plano VPS/Cloud ou um plano Node.js que permita executar processos Node, configurar variáveis de ambiente e fazer proxy reverso. Caso o plano atual seja compartilhado sem Node.js, a opção correta é migrar este app para VPS/Cloud ou usar uma plataforma Node compatível.
+- Repositório GitHub atualizado na branch `main`.
+- Projeto Supabase existente com o schema já aplicado.
+- Node.js 20.9 ou superior para desenvolvimento local.
 
-## Preparar Supabase
+## 1. GitHub
 
-1. Em **Authentication → URL Configuration**, inclua a URL de produção em `Site URL` e nas URLs de redirecionamento.
-2. Rode [supabase/schema.sql](supabase/schema.sql) uma única vez no SQL Editor.
-3. Confirme em **Database → Policies** que `transactions`, `credit_cards` e `goals` têm RLS ativado e somente as políticas `own …` criadas pelo script.
-4. Nunca copie a `service_role` key para a aplicação ou painel de hospedagem público.
+Confirme que `.env.local`, `.env`, `.next`, `node_modules` e `.vercel` não estão versionados. Publique as alterações normais na branch `main`; não envie credenciais.
 
-## Publicar em um ambiente Node.js
+## 2. Importar na Vercel
 
-1. Suba o código pelo Git ou SFTP, sem arquivos `.env*`.
-2. No painel da HostGator/VPS, configure:
+1. Abra o painel Vercel e escolha **Add New → Project**.
+2. Importe `matheusriccih/financas-matheus` e selecione a branch `main`.
+3. Mantenha o preset **Next.js**. A Vercel detecta instalação e build automaticamente.
+4. Em **Environment Variables**, cadastre para o ambiente **Production**:
 
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-   NEXT_PUBLIC_SITE_URL=https://financas.exemplo.com
-   NODE_ENV=production
+   NEXT_PUBLIC_SITE_URL=https://seu-dominio-real.com.br
    ```
 
-3. Execute no diretório do projeto:
+   Use valores do seu painel Supabase. A Publishable Key é apropriada para o navegador; nunca cadastre service role, secret key, token administrativo ou senha no projeto.
 
-   ```bash
-   npm ci
-   npm run build
-   npm run start
+5. Clique em **Deploy**. Depois de alterar qualquer variável `NEXT_PUBLIC_*`, faça um novo deploy: elas são incorporadas durante o build.
+
+## 3. Domínio
+
+1. Em **Project → Settings → Domains**, adicione seu domínio real.
+2. A Vercel mostrará os registros DNS exigidos. Copie exatamente os valores exibidos no painel para o provedor do domínio; não use valores genéricos deste documento.
+3. Aguarde a validação. A Vercel emite e renova HTTPS automaticamente.
+4. Escolha um domínio canônico e defina-o em `NEXT_PUBLIC_SITE_URL`, depois faça redeploy.
+
+## 4. Supabase Auth
+
+No painel Supabase, em **Authentication → URL Configuration**:
+
+1. Configure **Site URL** com o domínio HTTPS canônico da Vercel.
+2. Adicione Redirect URLs:
+
+   ```text
+   http://localhost:3000/auth/callback
+   https://seu-dominio-real.com.br/auth/callback
    ```
 
-4. Mantenha o processo vivo com o gerenciador oferecido pelo plano (ou systemd/PM2 em VPS). Aponte o proxy reverso para a porta do processo, normalmente `3000`.
-5. Aponte o DNS do domínio ao IP/host indicado pela HostGator e habilite SSL. Redirecione HTTP para HTTPS.
+3. Para ambientes Preview, adicione somente URLs de preview que você realmente for usar e mantenha a URL canônica de produção em `NEXT_PUBLIC_SITE_URL` no ambiente Production.
+4. Configure SMTP próprio para confirmação e recuperação de senha. O passo a passo está em [AUTH-SUPABASE.md](AUTH-SUPABASE.md).
 
-## Checklist pós-deploy
+## 5. Banco de dados
 
-- Abra `/auth/signup`, confirme e-mail se estiver habilitado e faça login.
-- Verifique que uma sessão anônima é redirecionada ao abrir `/dashboard`.
-- Crie uma movimentação, cartão e meta; recarregue a página para confirmar persistência.
-- Teste com um segundo usuário: nenhum registro do primeiro usuário deve aparecer.
-- Revise os logs do servidor, sem expor chaves ou dados financeiros.
+Não recrie nem apague tabelas. Se o Supabase já recebeu uma versão anterior do schema, execute uma vez no SQL Editor a migration não destrutiva:
 
-## Problemas comuns
+[supabase/migrations/202609100001_credit_cards_canonical.sql](supabase/migrations/202609100001_credit_cards_canonical.sql)
 
-- **"A configuração do Supabase não está disponível"**: confira as duas variáveis e reinicie o processo após alterá-las.
-- **Falha ao inserir dados**: execute novamente o schema idempotente e confirme que o usuário está autenticado.
-- **Loop de login**: confira URL/Publishable Key, URLs de redirecionamento do Supabase, cookies HTTPS e relógio do servidor.
-- **Página 502/503**: o processo Node não está ativo ou o proxy aponta para a porta errada.
+Ela mantém `credit_limit` como campo oficial, sincroniza o legado `"limit"` e recalcula `used` pelas transações existentes.
+
+## 6. Verificação pós-deploy
+
+1. Abra a URL da Vercel e crie uma conta.
+2. Confirme o e-mail e valide o retorno a `/dashboard`.
+3. Teste login, logout e recuperação de senha.
+4. Teste CRUD de movimentações, cartões e metas.
+5. Confirme com um segundo usuário que RLS não expõe dados de outro usuário.
+
+O checklist completo está em [CHECKLIST-PRODUCAO.md](CHECKLIST-PRODUCAO.md).
