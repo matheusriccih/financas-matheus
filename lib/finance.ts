@@ -6,7 +6,10 @@ export const categories = [
 ];
 
 export function toCents(value: unknown): number {
-  const amount = typeof value === "number" ? value : Number(value ?? 0);
+  const normalized = typeof value === "string"
+    ? value.trim().replace(/\.(?=\d{3}(?:\D|$))/g, "").replace(",", ".")
+    : value;
+  const amount = typeof normalized === "number" ? normalized : Number(normalized ?? 0);
   return Number.isFinite(amount) ? Math.round(amount * 100) : 0;
 }
 
@@ -21,7 +24,9 @@ export function formatCurrency(value: unknown): string {
 }
 
 export function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Data não informada";
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? "Data não informada" : new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(date);
 }
 
 export function currentMonth(): string {
@@ -30,6 +35,7 @@ export function currentMonth(): string {
 
 export function monthName(month: string): string {
   const [year, number] = month.split("-").map(Number);
+  if (!Number.isInteger(year) || !Number.isInteger(number) || number < 1 || number > 12) return "Período inválido";
   return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(year, number - 1, 1));
 }
 
@@ -47,10 +53,12 @@ function dateAtDay(base: Date, day: number): Date {
 }
 
 export function invoicePeriod(closingDay: number, reference = new Date()) {
-  const today = new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate()));
-  const thisClosing = dateAtDay(today, closingDay);
-  const end = today <= thisClosing ? thisClosing : dateAtDay(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1)), closingDay);
-  const start = dateAtDay(new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - 1, 1)), closingDay);
+  const safeReference = Number.isNaN(reference.getTime()) ? new Date() : reference;
+  const safeClosingDay = Number.isInteger(closingDay) && closingDay >= 1 && closingDay <= 31 ? closingDay : 1;
+  const today = new Date(Date.UTC(safeReference.getUTCFullYear(), safeReference.getUTCMonth(), safeReference.getUTCDate()));
+  const thisClosing = dateAtDay(today, safeClosingDay);
+  const end = today <= thisClosing ? thisClosing : dateAtDay(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1)), safeClosingDay);
+  const start = dateAtDay(new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - 1, 1)), safeClosingDay);
   start.setUTCDate(start.getUTCDate() + 1);
   return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
 }

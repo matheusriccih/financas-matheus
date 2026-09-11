@@ -5,3 +5,9 @@ export function authCallbackUrl(next: string): string {
   url.searchParams.set("next", next);
   return url.toString();
 }
+
+export function safeInternalPath(value: string | null, fallback = "/dashboard"): string {
+  return value?.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
+    ? value
+    : fallback;
+}
