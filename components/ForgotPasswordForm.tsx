@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { authCallbackUrl } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 import "./AuthForms.css";
@@ -11,9 +11,13 @@ export default function ForgotPasswordForm() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const submitting = useRef(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setLoading(true); setError(""); setMessage("");
+    event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setLoading(true); setError(""); setMessage("");
     try {
       const { error: requestError } = await createClient().auth.resetPasswordForEmail(email, {
         redirectTo: authCallbackUrl("/auth/redefinir-senha"),
@@ -22,7 +26,7 @@ export default function ForgotPasswordForm() {
       setMessage("Se houver uma conta para este e-mail, enviaremos as instruções de recuperação em instantes.");
     } catch {
       setError("Não foi possível enviar as instruções agora. Verifique o e-mail e tente novamente mais tarde.");
-    } finally { setLoading(false); }
+    } finally { submitting.current = false; setLoading(false); }
   }
 
   return <main className="auth-page"><form className="auth-box" onSubmit={submit}>

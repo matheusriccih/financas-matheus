@@ -1,7 +1,7 @@
 export function authCallbackUrl(next: string): string {
-  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  const origin = configuredOrigin || window.location.origin;
-  const url = new URL("/auth/callback", origin);
+  // This runs in the browser. Using the current origin keeps recovery and
+  // confirmation links on the deployment the user is actually visiting.
+  const url = new URL("/auth/callback", window.location.origin);
   url.searchParams.set("next", next);
   return url.toString();
 }
