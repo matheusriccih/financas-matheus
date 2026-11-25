@@ -7,6 +7,21 @@
 --    para restaurar os dados fictícios.
 -- 4. Na Vercel, defina NEXT_PUBLIC_DEMO_EMAIL e NEXT_PUBLIC_DEMO_PASSWORD e faça um novo deploy.
 
+-- Bancos criados com a versão antiga do app ainda têm as colunas title, target_amount,
+-- current_amount e deadline em goals (title e target_amount são NOT NULL). Este trigger
+-- mantém essas colunas preenchidas a partir das atuais. Em bancos sem elas, não faz nada.
+create or replace function public.sync_goal_legacy_fields()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  new := jsonb_populate_record(new, jsonb_build_object(
+    'title', new.name, 'target_amount', new.target,
+    'current_amount', new.current, 'deadline', new.due_date));
+  return new;
+end; $$;
+drop trigger if exists goals_sync_legacy_fields on public.goals;
+create trigger goals_sync_legacy_fields before insert or update on public.goals
+  for each row execute function public.sync_goal_legacy_fields();
+
 do $$
 declare
   demo_email constant text := 'demo@financas-matheus.app';
