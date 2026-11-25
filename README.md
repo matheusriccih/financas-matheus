@@ -67,6 +67,18 @@ Se houver um registro legado com `user_id` nulo, ele não ficará acessível com
 
 Para instruções completas de produção na Vercel, veja [DEPLOY.md](DEPLOY.md).
 
+## Acesso de demonstração
+
+A tela de login pode exibir o botão **Ver demonstração sem cadastro**, que entra em uma conta com dados fictícios (6 meses de movimentações, 2 cartões e 3 metas). Essa conta é **somente leitura**: políticas RLS restritivas bloqueiam inserção, edição e exclusão no banco, e a interface também desativa as ações.
+
+Para ativar:
+
+1. No Supabase, em **Authentication > Users > Add user**, crie o usuário `demo@financas-matheus.app` com **Auto Confirm User** marcado.
+2. Rode [`supabase/demo.sql`](supabase/demo.sql) no SQL Editor. Ele marca a conta como demo (`app_metadata.demo = true`), recria os dados fictícios e cria as políticas somente leitura.
+3. Na Vercel, defina `NEXT_PUBLIC_DEMO_EMAIL` e `NEXT_PUBLIC_DEMO_PASSWORD` e faça um novo deploy.
+
+A senha da conta demo fica visível no frontend de propósito; como a conta não consegue gravar nada, isso não expõe dados reais. Sem essas variáveis o botão não aparece.
+
 ## Produção na Vercel
 
 A Vercel detecta automaticamente Next.js e executa `npm run build`; não é necessário `vercel.json`, Nginx, PM2 ou exportação estática. O guia de importação do GitHub, variáveis, domínio e Supabase está em [DEPLOY.md](DEPLOY.md). Consulte também [CHECKLIST-PRODUCAO.md](CHECKLIST-PRODUCAO.md) antes de publicar.
@@ -75,7 +87,9 @@ A Vercel detecta automaticamente Next.js e executa `npm run build`; não é nece
 
 ```text
 app/                 rotas do Next.js
-components/          interface e formulários
+components/          FinanceApp (estado e ações) e componentes de autenticação
+  finance/           navegação, hook de dados, formulários, UI compartilhada
+  finance/views/     uma view por página (visão geral, movimentações, cartões...)
 lib/                 Supabase e regras financeiras
 types/               tipos TypeScript
 supabase/schema.sql  criação/migração idempotente do banco
