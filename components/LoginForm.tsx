@@ -14,6 +14,14 @@ export default function LoginForm() {
       router.replace(safeInternalPath(new URLSearchParams(window.location.search).get("next")));
     } catch {setError("Não foi possível entrar agora. Verifique a conexão e tente novamente.");} finally {setLoading(false);}
   }
+  // Conta de demonstração (somente leitura) para quem quer conhecer o sistema sem se cadastrar.
+  const demoEmail=process.env.NEXT_PUBLIC_DEMO_EMAIL; const demoPassword=process.env.NEXT_PUBLIC_DEMO_PASSWORD;
+  async function enterDemo(){if(!demoEmail||!demoPassword)return;setLoading(true);setError("");
+    try {const {error}=await createClient().auth.signInWithPassword({email:demoEmail,password:demoPassword});
+      if(error){setError("A demonstração está indisponível no momento. Tente novamente mais tarde.");return;}
+      router.replace("/dashboard");
+    } catch {setError("Não foi possível abrir a demonstração agora. Verifique a conexão e tente novamente.");} finally {setLoading(false);}
+  }
   return <main className="auth-page"><form className="auth-box" onSubmit={submit}>
     <div className="auth-logo">M</div><h1>Bem-vindo de volta.</h1><p>Entre para acessar seu controle financeiro.</p>
     <label>E-mail<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="voce@email.com"/></label>
@@ -23,6 +31,7 @@ export default function LoginForm() {
     {message==="configuration"&&<div className="auth-error" role="alert">A aplicação não está configurada para autenticação. Tente novamente mais tarde.</div>}
     {error&&<div className="auth-error" role="alert">{error}</div>}
     <button className="auth-btn" disabled={loading}>{loading?"Entrando...":"Entrar"}</button>
+    {demoEmail&&demoPassword&&<button type="button" className="auth-btn auth-btn-demo" disabled={loading} onClick={()=>void enterDemo()}>Ver demonstração sem cadastro</button>}
     <Link className="auth-link" href="/auth/signup">Ainda não tenho conta</Link>
     <Link className="auth-link" href="/auth/esqueci-senha">Esqueci minha senha</Link>
   </form></main>
