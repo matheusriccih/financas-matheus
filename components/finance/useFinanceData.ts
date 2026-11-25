@@ -6,6 +6,7 @@ import { toCreditCard, toGoal, toTransaction } from "./mappers";
 
 type FinanceSnapshot = {
   email: string;
+  isDemo: boolean;
   name: string;
   transactions: Transaction[];
   cards: CreditCard[];
@@ -30,6 +31,8 @@ async function fetchFinanceData(): Promise<FinanceSnapshot> {
 
   return {
     email: user.data.user.email ?? "",
+    // A conta de demonstração é marcada em app_metadata (só o banco pode alterar).
+    isDemo: user.data.user.app_metadata?.demo === true,
     name: String(user.data.user.user_metadata.full_name ?? ""),
     transactions: (tx.data ?? []).map(toTransaction),
     cards: (cc.data ?? []).map(toCreditCard),
@@ -43,6 +46,7 @@ export function useFinanceData() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +55,7 @@ export function useFinanceData() {
       .then((snapshot) => {
         setEmail(snapshot.email);
         setName(snapshot.name);
+        setIsDemo(snapshot.isDemo);
         setTransactions(snapshot.transactions);
         setCards(snapshot.cards);
         setGoals(snapshot.goals);
@@ -72,7 +77,7 @@ export function useFinanceData() {
     transactions, setTransactions,
     cards, setCards,
     goals, setGoals,
-    email, name, setName,
+    email, name, setName, isDemo,
     loading, error, reload,
   };
 }
