@@ -1,12 +1,31 @@
 # Finanças Matheus
 
-Sistema financeiro pessoal multiusuário para registrar movimentações, acompanhar cartões de crédito, metas e relatórios com dados reais. O frontend é Next.js, a autenticação e persistência usam Supabase, e a produção usa Vercel.
+Sistema de gestão financeira pessoal **multiusuário**: cada pessoa cria a própria conta e vê apenas os próprios dados. Permite registrar entradas e despesas, acompanhar faturas de cartão de crédito, definir metas e ver relatórios mensais.
+
+**Demo:** [financas-matheus-six.vercel.app](https://financas-matheus-six.vercel.app) (crie uma conta para testar)
+
+## Funcionalidades
+
+- Cadastro, login, confirmação de e-mail e recuperação de senha (Supabase Auth)
+- Visão geral com saldo, entradas, despesas e taxa de economia do mês
+- Movimentações com categorias, busca e filtro por período
+- Cartões de crédito com cálculo da fatura atual pelo dia de fechamento e limite disponível
+- Metas com acompanhamento de progresso
+- Relatórios com evolução dos últimos 6 meses e despesas por categoria
+
+## Destaques técnicos
+
+- **Isolamento de dados com Row Level Security (RLS):** o banco só devolve os registros do usuário autenticado, e o `user_id` é definido por trigger a partir do JWT, não pelo navegador.
+- **Valores em centavos:** os cálculos são feitos em inteiros para evitar erro de arredondamento de ponto flutuante.
+- **Schema idempotente e versionado:** [supabase/schema.sql](supabase/schema.sql) pode ser executado mais de uma vez sem perder dados, com migration separada para mudanças.
+- **Deploy contínuo na Vercel** a partir da branch principal.
 
 ## Stack
 
-- Next.js 16, React 19 e TypeScript
-- Supabase Auth, PostgreSQL e Row Level Security (RLS)
-- CSS próprio e Lucide React
+- Next.js 16 (App Router), React 19 e TypeScript
+- Supabase: Auth, PostgreSQL e RLS
+- CSS próprio e ícones Lucide React
+- Hospedagem na Vercel
 
 ## Executar localmente
 
