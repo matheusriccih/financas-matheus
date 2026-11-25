@@ -15,7 +15,9 @@ export default function LoginForm() {
     } catch {setError("Não foi possível entrar agora. Verifique a conexão e tente novamente.");} finally {setLoading(false);}
   }
   // Conta de demonstração (somente leitura) para quem quer conhecer o sistema sem se cadastrar.
-  const demoEmail=process.env.NEXT_PUBLIC_DEMO_EMAIL; const demoPassword=process.env.NEXT_PUBLIC_DEMO_PASSWORD;
+  // A senha é pública de propósito: o banco bloqueia qualquer escrita dessa conta (supabase/demo.sql).
+  // As variáveis de ambiente permitem trocar a conta sem alterar o código.
+  const demoEmail=process.env.NEXT_PUBLIC_DEMO_EMAIL||"demo@financas-matheus.app"; const demoPassword=process.env.NEXT_PUBLIC_DEMO_PASSWORD||"123456";
   async function enterDemo(){if(!demoEmail||!demoPassword)return;setLoading(true);setError("");
     try {const {error}=await createClient().auth.signInWithPassword({email:demoEmail,password:demoPassword});
       if(error){setError("A demonstração está indisponível no momento. Tente novamente mais tarde.");return;}
