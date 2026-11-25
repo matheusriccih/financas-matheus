@@ -143,3 +143,13 @@ end $$;
 create policy "own transactions" on public.transactions for all to authenticated using (auth.uid()=user_id) with check (auth.uid()=user_id);
 create policy "own credit cards" on public.credit_cards for all to authenticated using (auth.uid()=user_id) with check (auth.uid()=user_id);
 create policy "own goals" on public.goals for all to authenticated using (auth.uid()=user_id) with check (auth.uid()=user_id);
+-- Conta de demonstração (app_metadata.demo = true): somente leitura. Veja supabase/demo.sql.
+create policy "demo read only insert" on public.transactions as restrictive for insert to authenticated with check (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only update" on public.transactions as restrictive for update to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only delete" on public.transactions as restrictive for delete to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only insert" on public.credit_cards as restrictive for insert to authenticated with check (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only update" on public.credit_cards as restrictive for update to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only delete" on public.credit_cards as restrictive for delete to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only insert" on public.goals as restrictive for insert to authenticated with check (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only update" on public.goals as restrictive for update to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
+create policy "demo read only delete" on public.goals as restrictive for delete to authenticated using (coalesce((auth.jwt()->'app_metadata'->>'demo')::boolean, false) = false);
