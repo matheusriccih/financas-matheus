@@ -47,6 +47,14 @@ export default function FinanceApp({ page }: { page: Page }) {
   const [category, setCategory] = useState("all");
 
   const notify = (message: string) => setNotice(message);
+
+  // Na conta de demonstração os formulários abrem, mas nada é gravado.
+  // O banco também bloqueia escrita para essa conta (ver supabase/demo.sql).
+  const blockedInDemo = () => {
+    if (!data.isDemo) return false;
+    notify("Modo demonstração: as alterações estão desativadas.");
+    return true;
+  };
   useEffect(() => {
     if (!notice) return;
     const timer = window.setTimeout(() => setNotice(null), 4500);
@@ -92,6 +100,7 @@ export default function FinanceApp({ page }: { page: Page }) {
 
   async function saveTransaction(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (blockedInDemo()) return;
     const editing = modal?.kind === "transaction" ? modal.item : null;
     const form = new FormData(e.currentTarget);
     const amount = toMoney(form.get("amount"));
@@ -130,6 +139,7 @@ export default function FinanceApp({ page }: { page: Page }) {
 
   async function saveCard(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (blockedInDemo()) return;
     const editing = modal?.kind === "card" ? modal.item : null;
     const form = new FormData(e.currentTarget);
     const limit = toMoney(form.get("credit_limit"));
@@ -168,6 +178,7 @@ export default function FinanceApp({ page }: { page: Page }) {
 
   async function saveGoal(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (blockedInDemo()) return;
     const editing = modal?.kind === "goal" ? modal.item : null;
     const form = new FormData(e.currentTarget);
     const target = toMoney(form.get("target"));
@@ -201,6 +212,7 @@ export default function FinanceApp({ page }: { page: Page }) {
 
   async function adjustGoal(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (blockedInDemo()) return;
     if (modal?.kind !== "adjust") return;
     const goal = modal.item;
     const form = new FormData(e.currentTarget);
@@ -223,6 +235,7 @@ export default function FinanceApp({ page }: { page: Page }) {
   }
 
   function askToDelete(table: Table, id: string, label: string) {
+    if (blockedInDemo()) return;
     setConfirm({
       text: `Excluir “${label}”? Esta ação não pode ser desfeita.`,
       run: async () => {
@@ -251,6 +264,7 @@ export default function FinanceApp({ page }: { page: Page }) {
 
   async function saveSettings(e: FormEvent) {
     e.preventDefault();
+    if (blockedInDemo()) return;
     setSaving(true);
     try {
       const { error } = await createClient().auth.updateUser({ data: { full_name: name.trim() } });
@@ -340,6 +354,12 @@ export default function FinanceApp({ page }: { page: Page }) {
             {page !== "configuracoes" && <button className="primary" onClick={newTransaction}><Plus size={17} />Nova movimentação</button>}
           </div>
         </header>
+
+        {data.isDemo && (
+          <div className="demo-banner" role="note">
+            Você está no <b>modo demonstração</b>, com dados fictícios. Explore à vontade: as alterações estão desativadas.
+          </div>
+        )}
 
         {notice && <div className="toast" role="status"><Check size={16} />{notice}</div>}
 
