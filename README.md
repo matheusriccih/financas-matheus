@@ -2,7 +2,7 @@
 
 Sistema de gestão financeira pessoal **multiusuário**: cada pessoa cria a própria conta e vê apenas os próprios dados. Permite registrar entradas e despesas, acompanhar faturas de cartão de crédito, definir metas e ver relatórios mensais.
 
-**Demo:** [financas-matheus-six.vercel.app](https://financas-matheus-six.vercel.app) (crie uma conta para testar)
+**Demo:** [financas-matheus-six.vercel.app](https://financas-matheus-six.vercel.app) (clique em **Ver demonstração sem cadastro** ou crie uma conta)
 
 ## Funcionalidades
 
@@ -75,9 +75,9 @@ Para ativar:
 
 1. No Supabase, em **Authentication > Users > Add user**, crie o usuário `demo@financas-matheus.app` com **Auto Confirm User** marcado.
 2. Rode [`supabase/demo.sql`](supabase/demo.sql) no SQL Editor. Ele marca a conta como demo (`app_metadata.demo = true`), recria os dados fictícios e cria as políticas somente leitura.
-3. Na Vercel, defina `NEXT_PUBLIC_DEMO_EMAIL` e `NEXT_PUBLIC_DEMO_PASSWORD` e faça um novo deploy.
+3. Pronto: o botão usa `demo@financas-matheus.app` por padrão. Para usar outra conta, defina `NEXT_PUBLIC_DEMO_EMAIL` e `NEXT_PUBLIC_DEMO_PASSWORD` na Vercel.
 
-A senha da conta demo fica visível no frontend de propósito; como a conta não consegue gravar nada, isso não expõe dados reais. Sem essas variáveis o botão não aparece.
+A senha da conta demo fica visível no frontend de propósito; como a conta não consegue gravar nada, isso não expõe dados reais.
 
 ## Produção na Vercel
 
