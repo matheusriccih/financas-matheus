@@ -68,6 +68,21 @@ alter table public.credit_cards alter column credit_limit set default 0, alter c
   alter column closing_day set default 1, alter column closing_day set not null, alter column due_day set default 10, alter column due_day set not null;
 alter table public.goals alter column target set default 1, alter column target set not null, alter column current set default 0, alter column current set not null;
 
+-- Bancos criados com a versão antiga do app ainda têm as colunas title, target_amount,
+-- current_amount e deadline em goals (title e target_amount são NOT NULL). Este trigger
+-- mantém essas colunas preenchidas a partir das atuais. Em bancos sem elas, não faz nada.
+create or replace function public.sync_goal_legacy_fields()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  new := jsonb_populate_record(new, jsonb_build_object(
+    'title', new.name, 'target_amount', new.target,
+    'current_amount', new.current, 'deadline', new.due_date));
+  return new;
+end; $$;
+drop trigger if exists goals_sync_legacy_fields on public.goals;
+create trigger goals_sync_legacy_fields before insert or update on public.goals
+  for each row execute function public.sync_goal_legacy_fields();
+
 alter table public.transactions drop constraint if exists transactions_credit_card_id_fkey;
 alter table public.transactions add constraint transactions_credit_card_id_fkey foreign key (credit_card_id) references public.credit_cards(id) on delete set null;
 create index if not exists transactions_user_date_idx on public.transactions (user_id, date desc);
